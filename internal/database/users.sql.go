@@ -26,7 +26,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.DB.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
+	row := q.db.QueryRowContext(ctx, createUser, arg.Email, arg.HashedPassword)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -43,7 +43,7 @@ DELETE FROM users
 `
 
 func (q *Queries) DeleteUsers(ctx context.Context) error {
-	_, err := q.DB.ExecContext(ctx, deleteUsers)
+	_, err := q.db.ExecContext(ctx, deleteUsers)
 	return err
 }
 
@@ -53,7 +53,7 @@ WHERE email = $1
 `
 
 func (q *Queries) LoginUser(ctx context.Context, email string) (User, error) {
-	row := q.DB.QueryRowContext(ctx, loginUser, email)
+	row := q.db.QueryRowContext(ctx, loginUser, email)
 	var i User
 	err := row.Scan(
 		&i.ID,

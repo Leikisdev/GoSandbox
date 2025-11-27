@@ -28,7 +28,7 @@ type CreateChirpParams struct {
 }
 
 func (q *Queries) CreateChirp(ctx context.Context, arg CreateChirpParams) (Chirp, error) {
-	row := q.DB.QueryRowContext(ctx, createChirp, arg.Body, arg.UserID)
+	row := q.db.QueryRowContext(ctx, createChirp, arg.Body, arg.UserID)
 	var i Chirp
 	err := row.Scan(
 		&i.ID,
@@ -46,7 +46,7 @@ WHERE id = $1
 `
 
 func (q *Queries) GetChirpById(ctx context.Context, id uuid.UUID) (Chirp, error) {
-	row := q.DB.QueryRowContext(ctx, getChirpById, id)
+	row := q.db.QueryRowContext(ctx, getChirpById, id)
 	var i Chirp
 	err := row.Scan(
 		&i.ID,
@@ -64,7 +64,7 @@ ORDER BY created_at ASC
 `
 
 func (q *Queries) GetChirps(ctx context.Context) ([]Chirp, error) {
-	rows, err := q.DB.QueryContext(ctx, getChirps)
+	rows, err := q.db.QueryContext(ctx, getChirps)
 	if err != nil {
 		return nil, err
 	}
