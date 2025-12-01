@@ -68,3 +68,28 @@ func (c *ApiConfig) ChirpGetSingleHandler(w http.ResponseWriter, r *http.Request
 
 	respondWithJSON(w, http.StatusOK, chirp)
 }
+
+func (c *ApiConfig) ChirpDeleteHandler(w http.ResponseWriter, r *http.Request) {
+	chirpId, err := uuid.Parse(r.PathValue("chirpID"))
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "invalid chirp ID")
+	}
+
+	chirp, err := c.DB.GetChirpById(r.Context(), chirpId)
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "unable to find chirp")
+		return
+	}
+
+	userId := r.Context().Value(ctxUserIdKey{}).(uuid.UUID)
+	if userId != chirp.UserID {
+		respondWithError(w, http.StatusForbidden, "cannot delete other chirps of other users")
+		return
+	}
+
+	if err := c.DB.DeleteChirpById(r.Context(), chirpId); err != nil {
+		respondWithError(w, http.StatusInternalServerError, "failed to delete chirp")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
