@@ -34,7 +34,7 @@ func (c *ApiConfig) ChirpPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	chirp, err := c.DB.CreateChirp(r.Context(), database.CreateChirpParams{
 		Body:   payload.Body,
-		UserID: payload.UserID,
+		UserID: r.Context().Value(ctxUserIdKey{}).(uuid.UUID),
 	})
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("Unable to create user, ERR: %s", err))

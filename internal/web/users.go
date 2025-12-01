@@ -56,3 +56,29 @@ func (c *ApiConfig) UserCreateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	respondWithJSON(w, http.StatusCreated, toUser(user))
 }
+
+func (c *ApiConfig) UserUpdateHandler(w http.ResponseWriter, r *http.Request) {
+	var params UserRequest
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&params); err != nil {
+		respondWithError(w, http.StatusBadRequest, "unable to parse request")
+		return
+	}
+
+	hashedPass, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "unable to hash password")
+		return
+	}
+
+	user, err := c.DB.UpdateUser(r.Context(), database.UpdateUserParams{
+		ID:             r.Context().Value(ctxUserIdKey{}).(uuid.UUID),
+		Email:          params.Email,
+		HashedPassword: hashedPass,
+	})
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, fmt.Sprintf("unable to update user, ERR: %v", err))
+		return
+	}
+	respondWithJSON(w, http.StatusOK, toUser(user))
+}

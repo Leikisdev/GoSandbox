@@ -18,11 +18,13 @@ func (c *ApiConfig) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", c.ChirpGetSingleHandler)
 	mux.HandleFunc("POST /api/refresh", c.RefreshTokenHandler)
 	mux.HandleFunc("POST /api/revoke", c.RevokeTokenHandler)
+	mux.HandleFunc("POST /api/users", c.UserCreateHandler)
 
 	// Protected routes (require auth)
 	protectedChirpPost := c.AuthMiddleware(http.HandlerFunc(c.ChirpPostHandler))
-	mux.Handle("POST /api/chirps", protectedChirpPost) // or use method dispatch
-	mux.HandleFunc("POST /api/users", c.UserCreateHandler)
+	mux.Handle("POST /api/chirps", protectedChirpPost)
+	protectedUserUpdate := c.AuthMiddleware(http.HandlerFunc(c.UserUpdateHandler))
+	mux.Handle("PUT /api/users", protectedUserUpdate)
 
 	// Admin routes
 	mux.HandleFunc("/admin/metrics", c.MetricsHandler)
